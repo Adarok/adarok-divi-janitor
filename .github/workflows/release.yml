@@ -1,0 +1,108 @@
+name: Release Plugin
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release:
+    name: Build and Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --no-dev --optimize-autoloader --no-interaction
+
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Create release directory
+        run: |
+          mkdir -p release
+          rsync -av --progress . release/adarok-divi-janitor \
+            --exclude .git \
+            --exclude .github \
+            --exclude .gitignore \
+            --exclude node_modules \
+            --exclude tests \
+            --exclude phpunit.xml \
+            --exclude phpcs.xml \
+            --exclude phpstan.neon \
+            --exclude phpstan-bootstrap.php \
+            --exclude composer.json \
+            --exclude composer.lock \
+            --exclude Makefile \
+            --exclude release \
+            --exclude .editorconfig \
+            --exclude .phpcs.xml.dist
+
+      - name: Create ZIP archive
+        run: |
+          cd release
+          zip -r ../adarok-divi-janitor-${{ steps.get_version.outputs.VERSION }}.zip adarok-divi-janitor/
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Get the previous tag
+          PREV_TAG=$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1) 2>/dev/null || echo "")
+
+          if [ -z "$PREV_TAG" ]; then
+            # First release - use all commits
+            CHANGELOG=$(git log --pretty=format:"- %s" --no-merges)
+          else
+            # Get commits since previous tag
+            CHANGELOG=$(git log ${PREV_TAG}..HEAD --pretty=format:"- %s" --no-merges)
+          fi
+
+          # Save to file for GitHub release
+          echo "$CHANGELOG" > CHANGELOG.txt
+
+          # Set output (escape newlines)
+          echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: adarok-divi-janitor-${{ steps.get_version.outputs.VERSION }}.zip
+          body: |
+            ## Adarok Divi Janitor v${{ steps.get_version.outputs.VERSION }}
+
+            WordPress plugin for managing your Divi Library items.
+
+            ### Installation
+            1. Download `adarok-divi-janitor-${{ steps.get_version.outputs.VERSION }}.zip`
+            2. Go to WordPress admin → Plugins → Add New → Upload Plugin
+            3. Upload the ZIP file and activate
+
+            ### Changes in this release
+            ${{ steps.changelog.outputs.CHANGELOG }}
+
+            ### Requirements
+            - WordPress 6.0+
+            - PHP 8.1+
+            - Divi Theme or Divi Builder plugin
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: adarok-divi-janitor-${{ steps.get_version.outputs.VERSION }}
+          path: adarok-divi-janitor-${{ steps.get_version.outputs.VERSION }}.zip
+          retention-days: 90

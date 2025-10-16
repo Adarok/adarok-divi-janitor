@@ -1,10 +1,77 @@
 /**
  * Admin Styles for Adarok Divi Janitor
+ *
+ * @package Adarok_Divi_Janitor
+ * @author  Adarok
+ * @license GPL-2.0+
+ * @link    https://adarok.com
+ * @copyright 2025 Adarok
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  */
 
 .adarok-divi-janitor {
     max-width: 1400px;
     margin: 20px 20px 20px 0;
+    position: relative;
+}
+
+/* Loading Overlay */
+.adarok-loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.95);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 1;
+    transition: opacity 0.3s ease-out;
+}
+
+.adarok-loading-overlay.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.adarok-loading-spinner {
+    text-align: center;
+}
+
+.adarok-loading-spinner .spinner {
+    float: none;
+    margin: 0 auto 20px;
+    width: 40px;
+    height: 40px;
+    background-size: 40px 40px;
+    visibility: visible;
+}
+
+.adarok-loading-spinner p {
+    font-size: 16px;
+    color: #2271b1;
+    font-weight: 600;
+    margin: 0;
+}
+
+.adarok-content-wrapper {
+    opacity: 0;
+    transition: opacity 0.3s ease-in;
+}
+
+.adarok-content-wrapper.fade-in {
+    opacity: 1;
 }
 
 .adarok-divi-janitor-intro {
@@ -59,6 +126,94 @@
     border-left: 4px solid #dba617;
 }
 
+.stat-box.stat-safe {
+    border-left: 4px solid #2271b1;
+}
+
+/* Usage Type Statistics */
+.adarok-divi-janitor-usage-stats {
+    margin: 20px 0;
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    padding: 20px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+.usage-stats-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.adarok-divi-janitor-usage-stats h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1d2327;
+}
+
+.usage-legend {
+    display: flex;
+    gap: 20px;
+    font-size: 13px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #646970;
+}
+
+.usage-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.usage-stat-box {
+    background: #f6f7f7;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    padding: 15px;
+    text-align: center;
+}
+
+.usage-stat-box.usage-stat-global {
+    border-left: 4px solid #1e8449;
+    background: #f0fdf4;
+}
+
+.usage-stat-box.usage-stat-copy {
+    border-left: 4px solid #c0392b;
+    background: #fef5f5;
+}
+
+.usage-stat-number {
+    font-size: 28px;
+    font-weight: 600;
+    color: #1d2327;
+    line-height: 1.2;
+}
+
+.usage-stat-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1d2327;
+    margin-top: 5px;
+}
+
+.usage-stat-description {
+    font-size: 12px;
+    color: #646970;
+    margin-top: 5px;
+    font-style: italic;
+}
+
 /* Tabs */
 .adarok-divi-janitor-tabs {
     margin: 30px 0 0 0;
@@ -101,6 +256,26 @@
 
 .tab-button.active .count {
     color: #2271b1;
+}
+
+.tab-button.tab-safe {
+    font-weight: 600;
+}
+
+.tab-button.tab-safe:hover,
+.tab-button.tab-safe.active {
+    color: #2271b1;
+    background: #e7f5fe;
+}
+
+.tab-button.tab-global {
+    font-weight: 600;
+}
+
+.tab-button.tab-global:hover,
+.tab-button.tab-global.active {
+    color: #27ae60;
+    background: #f0f9f4;
 }
 
 /* Tab Content */
@@ -161,6 +336,8 @@
     font-size: 12px;
     font-weight: 500;
     text-transform: capitalize;
+    min-width: 70px;
+    text-align: center;
 }
 
 .type-badge.type-layout {
@@ -169,18 +346,18 @@
 }
 
 .type-badge.type-section {
-    background: #fef5e7;
-    color: #b26b00;
+    background: #008bdb;
+    color: #ffffff;
 }
 
 .type-badge.type-row {
-    background: #f0e7fe;
-    color: #6b00b2;
+    background: #00c3aa;
+    color: #ffffff;
 }
 
 .type-badge.type-module {
-    background: #e7fef0;
-    color: #00b26b;
+    background: #32373c;
+    color: #ffffff;
 }
 
 /* Usage Details */
@@ -209,6 +386,17 @@
 .usage-details li {
     margin: 5px 0;
     line-height: 1.6;
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.usage-details li .usage-link-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: nowrap;
 }
 
 .usage-details a {
@@ -223,12 +411,102 @@
 .usage-meta {
     color: #646970;
     font-size: 12px;
-    margin-left: 5px;
+}
+
+.usage-type-icon {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.usage-type-icon.usage-type-icon-global {
+    color: #1e8449;
+}
+
+.usage-type-icon.usage-type-icon-copy {
+    color: #c0392b;
 }
 
 .not-used {
     color: #646970;
     font-style: italic;
+}
+
+/* Bulk Actions Bar */
+.bulk-actions-bar {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-bottom: none;
+    padding: 15px 20px;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.bulk-actions-bar .button {
+    margin: 0;
+}
+
+.bulk-actions-bar .count {
+    font-weight: normal;
+    opacity: 0.8;
+}
+
+.bulk-actions-description {
+    margin: 0;
+    color: #646970;
+    font-size: 13px;
+}
+
+.bulk-actions-description ul {
+    margin: 10px 0;
+    padding-left: 25px;
+    list-style: disc;
+}
+
+.bulk-actions-description ul li {
+    margin: 5px 0;
+}
+
+.bulk-actions-description .warning {
+    color: #b32d2e;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.bulk-actions-description .info {
+    color: #2271b1;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.bulk-actions-description .info-global {
+    color: #1e8449;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.bulk-actions-bar.bulk-actions-safe {
+    background: #f0f6fc;
+    border-color: #2271b1;
+}
+
+.bulk-actions-bar.bulk-actions-info {
+    background: #fef9f5;
+    border-color: #dba617;
+}
+
+.bulk-actions-bar.bulk-actions-info-only {
+    background: #f0f9f4;
+    border-color: #27ae60;
+}
+
+.bulk-actions-bar.bulk-actions-info-only .bulk-actions-description .warning {
+    color: #d63638;
+    font-weight: 600;
 }
 
 /* Delete Button */
