@@ -1,0 +1,328 @@
+/**
+ * Admin Styles for Adarok Divi Janitor
+ */
+
+.adarok-divi-janitor {
+    max-width: 1400px;
+    margin: 20px 20px 20px 0;
+}
+
+.adarok-divi-janitor-intro {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-left: 4px solid #2271b1;
+    padding: 15px 20px;
+    margin: 20px 0;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+.adarok-divi-janitor-intro p {
+    margin: 0;
+    font-size: 14px;
+}
+
+/* Statistics */
+.adarok-divi-janitor-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.stat-box {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+.stat-number {
+    font-size: 36px;
+    font-weight: 600;
+    color: #1d2327;
+    line-height: 1.2;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: #646970;
+    margin-top: 5px;
+}
+
+.stat-box.stat-used {
+    border-left: 4px solid #00a32a;
+}
+
+.stat-box.stat-unused {
+    border-left: 4px solid #dba617;
+}
+
+/* Tabs */
+.adarok-divi-janitor-tabs {
+    margin: 30px 0 0 0;
+    border-bottom: 1px solid #c3c4c7;
+    display: flex;
+    gap: 0;
+}
+
+.tab-button {
+    background: #f0f0f1;
+    border: 1px solid #c3c4c7;
+    border-bottom: none;
+    padding: 12px 20px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: #2c3338;
+    transition: all 0.2s;
+    margin-right: -1px;
+    position: relative;
+}
+
+.tab-button:hover {
+    background: #fff;
+    color: #2271b1;
+}
+
+.tab-button.active {
+    background: #fff;
+    color: #2271b1;
+    border-bottom: 2px solid #2271b1;
+    margin-bottom: -1px;
+}
+
+.tab-button .count {
+    color: #646970;
+    font-weight: 400;
+    margin-left: 5px;
+}
+
+.tab-button.active .count {
+    color: #2271b1;
+}
+
+/* Tab Content */
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Table Styles */
+.adarok-divi-janitor-table {
+    margin-top: 0;
+    background: #fff;
+    border: 1px solid #c3c4c7;
+}
+
+.adarok-divi-janitor-table th {
+    font-weight: 600;
+}
+
+.adarok-divi-janitor-table .column-title {
+    width: 35%;
+}
+
+.adarok-divi-janitor-table .column-type {
+    width: 15%;
+}
+
+.adarok-divi-janitor-table .column-modified {
+    width: 15%;
+}
+
+.adarok-divi-janitor-table .column-usage {
+    width: 20%;
+}
+
+.adarok-divi-janitor-table .column-actions {
+    width: 15%;
+}
+
+/* Type Badges */
+.type-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.type-badge.type-layout {
+    background: #e7f5fe;
+    color: #0073aa;
+}
+
+.type-badge.type-section {
+    background: #fef5e7;
+    color: #b26b00;
+}
+
+.type-badge.type-row {
+    background: #f0e7fe;
+    color: #6b00b2;
+}
+
+.type-badge.type-module {
+    background: #e7fef0;
+    color: #00b26b;
+}
+
+/* Usage Details */
+.toggle-usage {
+    color: #2271b1;
+    border-color: #2271b1;
+}
+
+.toggle-usage:hover {
+    background: #2271b1;
+    color: #fff;
+}
+
+.usage-details {
+    margin-top: 10px;
+    padding: 10px;
+    background: #f6f7f7;
+    border-radius: 3px;
+}
+
+.usage-details ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.usage-details li {
+    margin: 5px 0;
+    line-height: 1.6;
+}
+
+.usage-details a {
+    color: #2271b1;
+    text-decoration: none;
+}
+
+.usage-details a:hover {
+    text-decoration: underline;
+}
+
+.usage-meta {
+    color: #646970;
+    font-size: 12px;
+    margin-left: 5px;
+}
+
+.not-used {
+    color: #646970;
+    font-style: italic;
+}
+
+/* Delete Button */
+.delete-library-item {
+    color: #b32d2e;
+    border-color: #b32d2e;
+}
+
+.delete-library-item:hover {
+    background: #b32d2e;
+    color: #fff;
+    border-color: #b32d2e;
+}
+
+.delete-library-item:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* No Items Message */
+.adarok-no-items {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    padding: 40px;
+    text-align: center;
+}
+
+.adarok-no-items p {
+    margin: 0;
+    color: #646970;
+    font-size: 14px;
+}
+
+/* Loading State */
+.adarok-loading {
+    position: relative;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.adarok-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #2271b1;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Row Deletion Animation */
+.deleting-row {
+    opacity: 0.5;
+    background: #fef5e7;
+}
+
+.deleted-row {
+    animation: slideOut 0.5s forwards;
+}
+
+@keyframes slideOut {
+    to {
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+}
+
+/* Responsive */
+@media (max-width: 782px) {
+    .adarok-divi-janitor-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .adarok-divi-janitor-tabs {
+        flex-direction: column;
+    }
+
+    .tab-button {
+        border-bottom: 1px solid #c3c4c7;
+        margin-right: 0;
+    }
+
+    .tab-button.active {
+        border-left: 4px solid #2271b1;
+        border-bottom: 1px solid #c3c4c7;
+    }
+}
