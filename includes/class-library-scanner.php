@@ -64,6 +64,7 @@ class Adarok_Divi_Janitor_Library_Scanner {
 					'title'         => get_the_title(),
 					'type'          => self::get_layout_type( $post_id ),
 					'modified_date' => get_the_modified_date( 'Y-m-d H:i:s' ),
+					'is_global'     => self::is_global( $post_id ),
 					'usage'         => array(),
 				);
 			}
@@ -130,6 +131,45 @@ class Adarok_Divi_Janitor_Library_Scanner {
 	}
 
 	/**
+	 * Check if a library item is marked as global
+	 *
+	 * @param int $post_id The post ID.
+	 * @return bool True if global, false otherwise
+	 */
+	private static function is_global( $post_id ) {
+		global $wpdb;
+
+		// Try both possible taxonomy names (Divi uses different names in different contexts).
+		$taxonomy_names = array( 'et_pb_layout_scope', 'scope' );
+
+		foreach ( $taxonomy_names as $taxonomy_name ) {
+			// Check if taxonomy is registered before trying to use it.
+			if ( taxonomy_exists( $taxonomy_name ) ) {
+				// Check if the post has a 'global' term in the scope taxonomy.
+				$terms = wp_get_post_terms( $post_id, $taxonomy_name, array( 'fields' => 'names' ) );
+
+				if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
+					return in_array( 'global', $terms, true );
+				}
+			}
+		}
+
+		// Fallback: Query the database directly if taxonomy not yet registered.
+		// Check both possible taxonomy names.
+		$has_global = $wpdb->get_var(  // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->terms} t
+				INNER JOIN {$wpdb->term_taxonomy} tt ON t.term_id = tt.term_id
+				INNER JOIN {$wpdb->term_relationships} tr ON tt.term_taxonomy_id = tr.term_taxonomy_id
+				WHERE tr.object_id = %d AND tt.taxonomy IN ('et_pb_layout_scope', 'scope') AND t.name = 'global'",
+				$post_id
+			)
+		);
+
+		return $has_global > 0;
+	}
+
+	/**
 	 * Find where library items are used
 	 *
 	 * @param array $library_items Array of library items.
@@ -169,18 +209,23 @@ class Adarok_Divi_Janitor_Library_Scanner {
 		}
 
 		// Search for the library ID in post content.
-		// Two types of usage:.
-		// 1. Global reference: global_module="123", template_id="123".
-		// 2. Instantiated content: copied content that matches the library item.
+		// Three types of usage:
+		// 1. Global reference: global_module="123", template_id="123" (Divi 4).
+		// 2. Global reference: "globalModule":"123" (Divi 5 block format).
+		// 3. Instantiated content: copied content that matches the library item.
 
 		// Global reference patterns.
 		$global_patterns = array(
+			// Divi 4 patterns.
 			'global_module="' . $lib_id . '"',
 			'global_module=\"' . $lib_id . '\"',
 			'template_id="' . $lib_id . '"',
 			'template_id=\"' . $lib_id . '\"',
 			'saved_tabs="' . $lib_id . '"',
 			'saved_tabs=\"' . $lib_id . '\"',
+			// Divi 5 patterns (block-based editor).
+			'"globalModule":"' . $lib_id . '"',
+			'\\"globalModule\\":\\"' . $lib_id . '\\"',
 		);
 
 		foreach ( $post_types as $post_type ) {
