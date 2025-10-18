@@ -449,6 +449,9 @@ class Adarok_Divi_Janitor_Admin_Page {
 						<span class="type-badge type-<?php echo esc_attr( sanitize_title( $item['type'] ) ); ?>">
 							<?php echo esc_html( $item['type'] ); ?>
 						</span>
+						<?php if ( ! empty( $item['is_global'] ) ) : ?>
+							<span class="dashicons dashicons-admin-site global-indicator" title="<?php esc_attr_e( 'This item is marked as global', 'adarok-divi-janitor' ); ?>"></span>
+						<?php endif; ?>
 					</td>
 					<td class="column-modified">
 						<?php echo esc_html( date_i18n( get_option( 'date_format' ), strtotime( $item['modified_date'] ) ) ); ?>
