@@ -7,7 +7,7 @@
 
 A WordPress plugin that helps you manage your Divi Library by showing where each library item is used throughout your site, with the ability to safely delete unused items.
 
-**Version**: 1.0.0 | **License**: GPL v2+ | **Author**: [Adarok](https://adarok.fi)
+**Version**: 1.1.0 | **License**: GPL v2+ | **Author**: [Adarok](https://adarok.fi)
 
 ---
 
@@ -411,6 +411,12 @@ This program is free software; you can redistribute it and/or modify it under th
 ---
 
 ## 📝 Changelog
+
+### Version 1.1.0 - October 2025
+- ✅ Added Divi 5 `globalModule` detection to global usage scanner
+- ✅ Added support for detecting global scope taxonomy flags
+- ✅ Display green globe indicator for globally scoped items in the admin table
+- ✅ General refinements to make global references more visible at a glance
 
 ### Version 1.0.0 - October 2025
 - ✅ Initial release
