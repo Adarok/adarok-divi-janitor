@@ -583,12 +583,22 @@
             var noticeClass = type === 'success' ? 'notice-success' : 'notice-error';
 
             var $notice = $('<div>', {
-                class: 'notice ' + noticeClass + ' is-dismissible',
-                html: '<p>' + message + '</p>'
+                class: 'notice ' + noticeClass + ' is-dismissible'
             });
 
+            var $message = $('<p>').text(message);
+            $notice.append($message);
+
+            var $dismissButton = $('<button>', {
+                type: 'button',
+                class: 'notice-dismiss'
+            }).append($('<span>', {
+                class: 'screen-reader-text',
+                text: 'Dismiss this notice.'
+            }));
+
             // Add dismiss button
-            $notice.append('<button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button>');
+            $notice.append($dismissButton);
 
             // Insert notice
             $('.adarok-divi-janitor h1').after($notice);
