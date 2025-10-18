@@ -3,7 +3,7 @@
  * Plugin Name: Adarok Divi Janitor
  * Plugin URI: https://adarok.com
  * Description: Manage your Divi Library by viewing where items are used and safely deleting unused items.
- * Version: 1.1.0
+ * Version: 1.1.1
  * Author: Adarok
  * Author URI: https://adarok.com
  * License: GPL v2 or later
@@ -40,7 +40,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Define plugin constants.
-define( 'ADAROK_DIVI_JANITOR_VERSION', '1.1.0' );
+define( 'ADAROK_DIVI_JANITOR_VERSION', '1.1.1' );
 define( 'ADAROK_DIVI_JANITOR_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'ADAROK_DIVI_JANITOR_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'ADAROK_DIVI_JANITOR_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
