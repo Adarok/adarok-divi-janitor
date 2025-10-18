@@ -148,10 +148,8 @@ class Adarok_Divi_Janitor_Ajax_Handler {
 			wp_raise_memory_limit( 'admin' );
 		}
 
-		// Temporarily disable Divi dynamic assets to prevent null reference errors.
-		remove_all_actions( 'before_delete_post' );
-		remove_all_actions( 'wp_trash_post' );
-		remove_all_filters( 'the_content' );
+		// Temporarily disable Divi dynamic asset callbacks to prevent null reference errors.
+		$disabled_hooks = $this->disable_divi_dynamic_asset_hooks();
 
 		// Get all library items.
 		$library_items = Adarok_Divi_Janitor_Library_Scanner::get_library_items();
@@ -185,9 +183,18 @@ class Adarok_Divi_Janitor_Ajax_Handler {
 		}
 
 		// Build response message.
-		if ( $deleted_count > 0 && $failed_count === 0 ) {
-			wp_send_json_success(
-				array(
+		$response = array(
+			'type'   => 'error',
+			'data'   => array(
+				'message' => __( 'No safe-to-delete items found.', 'adarok-divi-janitor' ),
+			),
+			'status' => 400,
+		);
+
+		if ( $deleted_count > 0 && 0 === $failed_count ) {
+			$response = array(
+				'type'   => 'success',
+				'data'   => array(
 					'message'       => sprintf(
 						_n(
 							'%d library item deleted successfully.',
@@ -199,11 +206,13 @@ class Adarok_Divi_Janitor_Ajax_Handler {
 					),
 					'deleted_count' => $deleted_count,
 					'deleted_ids'   => $deleted_ids,
-				)
+				),
+				'status' => null,
 			);
 		} elseif ( $deleted_count > 0 && $failed_count > 0 ) {
-			wp_send_json_success(
-				array(
+			$response = array(
+				'type'   => 'success',
+				'data'   => array(
 					'message'       => sprintf(
 						__( '%1$d items deleted, %2$d failed. Errors: %3$s', 'adarok-divi-janitor' ),
 						$deleted_count,
@@ -214,27 +223,30 @@ class Adarok_Divi_Janitor_Ajax_Handler {
 					'failed_count'  => $failed_count,
 					'deleted_ids'   => $deleted_ids,
 					'errors'        => $errors,
-				)
+				),
+				'status' => null,
 			);
-		} elseif ( $deleted_count === 0 && $failed_count > 0 ) {
-			wp_send_json_error(
-				array(
+		} elseif ( 0 === $deleted_count && $failed_count > 0 ) {
+			$response = array(
+				'type'   => 'error',
+				'data'   => array(
 					'message' => sprintf(
 						__( 'Failed to delete items. Errors: %s', 'adarok-divi-janitor' ),
 						implode( '; ', $errors )
 					),
 					'errors'  => $errors,
 				),
-				400
-			);
-		} else {
-			wp_send_json_error(
-				array(
-					'message' => __( 'No safe-to-delete items found.', 'adarok-divi-janitor' ),
-				),
-				400
+				'status' => 400,
 			);
 		}
+
+		$this->restore_divi_dynamic_asset_hooks( $disabled_hooks );
+
+		if ( 'success' === $response['type'] ) {
+			wp_send_json_success( $response['data'] );
+		}
+
+		wp_send_json_error( $response['data'], $response['status'] );
 	}
 
 	/**
@@ -267,10 +279,8 @@ class Adarok_Divi_Janitor_Ajax_Handler {
 			wp_raise_memory_limit( 'admin' );
 		}
 
-		// Temporarily disable Divi dynamic assets to prevent null reference errors.
-		remove_all_actions( 'before_delete_post' );
-		remove_all_actions( 'wp_trash_post' );
-		remove_all_filters( 'the_content' );
+		// Temporarily disable Divi dynamic asset callbacks to prevent null reference errors.
+		$disabled_hooks = $this->disable_divi_dynamic_asset_hooks();
 
 		// Get all library items.
 		$library_items = Adarok_Divi_Janitor_Library_Scanner::get_library_items();
@@ -301,9 +311,18 @@ class Adarok_Divi_Janitor_Ajax_Handler {
 		}
 
 		// Build response message.
-		if ( $deleted_count > 0 && $failed_count === 0 ) {
-			wp_send_json_success(
-				array(
+		$response = array(
+			'type'   => 'error',
+			'data'   => array(
+				'message' => __( 'No items with only copies found.', 'adarok-divi-janitor' ),
+			),
+			'status' => 400,
+		);
+
+		if ( $deleted_count > 0 && 0 === $failed_count ) {
+			$response = array(
+				'type'   => 'success',
+				'data'   => array(
 					'message'       => sprintf(
 						_n(
 							'%d library item with copies deleted successfully.',
@@ -315,11 +334,13 @@ class Adarok_Divi_Janitor_Ajax_Handler {
 					),
 					'deleted_count' => $deleted_count,
 					'deleted_ids'   => $deleted_ids,
-				)
+				),
+				'status' => null,
 			);
 		} elseif ( $deleted_count > 0 && $failed_count > 0 ) {
-			wp_send_json_success(
-				array(
+			$response = array(
+				'type'   => 'success',
+				'data'   => array(
 					'message'       => sprintf(
 						__( '%1$d items deleted, %2$d failed. Errors: %3$s', 'adarok-divi-janitor' ),
 						$deleted_count,
@@ -330,27 +351,30 @@ class Adarok_Divi_Janitor_Ajax_Handler {
 					'failed_count'  => $failed_count,
 					'deleted_ids'   => $deleted_ids,
 					'errors'        => $errors,
-				)
+				),
+				'status' => null,
 			);
-		} elseif ( $deleted_count === 0 && $failed_count > 0 ) {
-			wp_send_json_error(
-				array(
+		} elseif ( 0 === $deleted_count && $failed_count > 0 ) {
+			$response = array(
+				'type'   => 'error',
+				'data'   => array(
 					'message' => sprintf(
 						__( 'Failed to delete items. Errors: %s', 'adarok-divi-janitor' ),
 						implode( '; ', $errors )
 					),
 					'errors'  => $errors,
 				),
-				400
-			);
-		} else {
-			wp_send_json_error(
-				array(
-					'message' => __( 'No items with only copies found.', 'adarok-divi-janitor' ),
-				),
-				400
+				'status' => 400,
 			);
 		}
+
+		$this->restore_divi_dynamic_asset_hooks( $disabled_hooks );
+
+		if ( 'success' === $response['type'] ) {
+			wp_send_json_success( $response['data'] );
+		}
+
+		wp_send_json_error( $response['data'], $response['status'] );
 	}
 
 	/**
@@ -383,10 +407,8 @@ class Adarok_Divi_Janitor_Ajax_Handler {
 			wp_raise_memory_limit( 'admin' );
 		}
 
-		// Temporarily disable Divi dynamic assets to prevent null reference errors.
-		remove_all_actions( 'before_delete_post' );
-		remove_all_actions( 'wp_trash_post' );
-		remove_all_filters( 'the_content' );
+		// Temporarily disable Divi dynamic asset callbacks to prevent null reference errors.
+		$disabled_hooks = $this->disable_divi_dynamic_asset_hooks();
 
 		// Get all library items.
 		$library_items = Adarok_Divi_Janitor_Library_Scanner::get_library_items();
@@ -417,9 +439,18 @@ class Adarok_Divi_Janitor_Ajax_Handler {
 		}
 
 		// Build response message.
-		if ( $deleted_count > 0 && $failed_count === 0 ) {
-			wp_send_json_success(
-				array(
+		$response = array(
+			'type'   => 'error',
+			'data'   => array(
+				'message' => __( 'No unused items found to delete.', 'adarok-divi-janitor' ),
+			),
+			'status' => 400,
+		);
+
+		if ( $deleted_count > 0 && 0 === $failed_count ) {
+			$response = array(
+				'type'   => 'success',
+				'data'   => array(
 					'message'       => sprintf(
 						_n(
 							'%d library item deleted successfully.',
@@ -431,11 +462,13 @@ class Adarok_Divi_Janitor_Ajax_Handler {
 					),
 					'deleted_count' => $deleted_count,
 					'deleted_ids'   => $deleted_ids,
-				)
+				),
+				'status' => null,
 			);
 		} elseif ( $deleted_count > 0 && $failed_count > 0 ) {
-			wp_send_json_success(
-				array(
+			$response = array(
+				'type'   => 'success',
+				'data'   => array(
 					'message'       => sprintf(
 						__( '%1$d items deleted, %2$d failed. Errors: %3$s', 'adarok-divi-janitor' ),
 						$deleted_count,
@@ -446,26 +479,130 @@ class Adarok_Divi_Janitor_Ajax_Handler {
 					'failed_count'  => $failed_count,
 					'deleted_ids'   => $deleted_ids,
 					'errors'        => $errors,
-				)
+				),
+				'status' => null,
 			);
-		} elseif ( $deleted_count === 0 && $failed_count > 0 ) {
-			wp_send_json_error(
-				array(
+		} elseif ( 0 === $deleted_count && $failed_count > 0 ) {
+			$response = array(
+				'type'   => 'error',
+				'data'   => array(
 					'message' => sprintf(
 						__( 'Failed to delete items. Errors: %s', 'adarok-divi-janitor' ),
 						implode( '; ', $errors )
 					),
 					'errors'  => $errors,
 				),
-				400
-			);
-		} else {
-			wp_send_json_error(
-				array(
-					'message' => __( 'No unused items found to delete.', 'adarok-divi-janitor' ),
-				),
-				400
+				'status' => 400,
 			);
 		}
+
+		$this->restore_divi_dynamic_asset_hooks( $disabled_hooks );
+
+		if ( 'success' === $response['type'] ) {
+			wp_send_json_success( $response['data'] );
+		}
+
+		wp_send_json_error( $response['data'], $response['status'] );
+	}
+
+	/**
+	 * Temporarily disable Divi dynamic asset callbacks on key hooks.
+	 *
+	 * @return array Removed callbacks keyed by hook name.
+	 */
+	private function disable_divi_dynamic_asset_hooks() {
+		$hooks   = array( 'before_delete_post', 'wp_trash_post', 'the_content' );
+		$removed = array();
+
+		foreach ( $hooks as $hook ) {
+			$callbacks = $this->remove_prefixed_callbacks( $hook, array( 'et_', 'ET_' ) );
+			if ( ! empty( $callbacks ) ) {
+				$removed[ $hook ] = $callbacks;
+			}
+		}
+
+		return $removed;
+	}
+
+	/**
+	 * Restore previously disabled Divi dynamic asset callbacks.
+	 *
+	 * @param array $removed_hooks Removed callbacks keyed by hook name.
+	 */
+	private function restore_divi_dynamic_asset_hooks( array $removed_hooks ) {
+		foreach ( $removed_hooks as $hook => $callbacks ) {
+			foreach ( $callbacks as $callback ) {
+				add_filter( $hook, $callback['function'], $callback['priority'], $callback['accepted_args'] );
+			}
+		}
+	}
+
+	/**
+	 * Remove callbacks from a hook when their callable names match specific prefixes.
+	 *
+	 * @param string $hook     Hook name.
+	 * @param array  $prefixes List of prefixes to match.
+	 * @return array Removed callbacks containing function, priority, and accepted args.
+	 */
+	private function remove_prefixed_callbacks( $hook, $prefixes ) {
+		global $wp_filter;
+
+		if ( empty( $wp_filter[ $hook ] ) ) {
+			return array();
+		}
+
+		$wp_hook = $wp_filter[ $hook ];
+
+		if ( ! class_exists( 'WP_Hook' ) || ! $wp_hook instanceof WP_Hook ) {
+			return array();
+		}
+
+		$removed_callbacks = array();
+
+		foreach ( $wp_hook->callbacks as $priority => $callbacks ) {
+			foreach ( $callbacks as $callback ) {
+				$callable_name = $this->normalize_callable_name( $callback['function'] );
+
+				if ( '' === $callable_name ) {
+					continue;
+				}
+
+				foreach ( $prefixes as $prefix ) {
+					if ( 0 === strpos( $callable_name, $prefix ) ) {
+						remove_filter( $hook, $callback['function'], $priority );
+						$removed_callbacks[] = array(
+							'function'      => $callback['function'],
+							'priority'      => $priority,
+							'accepted_args' => isset( $callback['accepted_args'] ) ? (int) $callback['accepted_args'] : 1,
+						);
+						break;
+					}
+				}
+			}
+		}
+
+		return $removed_callbacks;
+	}
+
+	/**
+	 * Derive a normalized string representation of a callable for comparison.
+	 *
+	 * @param callable $candidate Callable to normalize.
+	 * @return string Normalized callable name, or empty string if unsupported.
+	 */
+	private function normalize_callable_name( $candidate ) {
+		if ( is_string( $candidate ) ) {
+			return $candidate;
+		}
+
+		if ( is_array( $candidate ) && isset( $candidate[0], $candidate[1] ) ) {
+			if ( is_object( $candidate[0] ) ) {
+				return get_class( $candidate[0] ) . '::' . $candidate[1];
+			}
+
+			return $candidate[0] . '::' . $candidate[1];
+		}
+
+		return '';
 	}
 }
