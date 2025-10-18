@@ -7,7 +7,7 @@
 
 A WordPress plugin that helps you manage your Divi Library by showing where each library item is used throughout your site, with the ability to safely delete unused items.
 
-**Version**: 1.1.0 | **License**: GPL v2+ | **Author**: [Adarok](https://adarok.fi)
+**Version**: 1.1.1 | **License**: GPL v2+ | **Author**: [Adarok](https://adarok.fi)
 
 ---
 
@@ -411,6 +411,10 @@ This program is free software; you can redistribute it and/or modify it under th
 ---
 
 ## 📝 Changelog
+
+### Version 1.1.1 - October 2025
+- ✅ Hardened admin notices against XSS by ensuring messages render as plain text
+- ✅ Disabled only the specific Divi dynamic asset callbacks during bulk deletes to preserve security hooks
 
 ### Version 1.1.0 - October 2025
 - ✅ Added Divi 5 `globalModule` detection to global usage scanner
