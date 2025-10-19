@@ -112,18 +112,18 @@ Instantiated copies are independent content that was copied from the library ite
 
 ### Detection Methods
 
-The plugin uses two sophisticated detection methods:
+Divi 4 and Divi 5 store library usage very differently, so the scanner keeps separate playbooks for each engine while presenting a unified result set in the dashboard.
 
 1. **Global Reference Detection**
-   - Searches for `global_module="[id]"`, `template_id="[id]"`, and `saved_tabs="[id]"` attributes
-   - Identifies content that is dynamically linked to library items
-   - Changes to library item automatically update all global references
+   - **Divi 4 (Classic Builder / shortcodes):** scans shortcode attributes such as `global_module="[id]"`, `template_id="[id]"`, and `saved_tabs="[id]"`, and checks the legacy `et_pb_layout_scope` taxonomy for the `global` term.
+   - **Divi 5 (Block Builder / JSON):** searches the JSON payload for keys like `"globalModule":"[id]"` and inspects the modern `scope` taxonomy to find globally scoped layouts.
+   - Any match is treated as a live link: editing the library item automatically changes every location flagged as “Global Reference”.
 
 2. **Instantiated Content Detection**
-   - Extracts unique signatures from library content (module IDs, CSS classes, admin labels)
-   - Searches for matching patterns across all content
-   - Uses similarity matching to verify copied content
-   - Identifies library items that were copied but are now independent
+   - **Divi 4:** analyses shortcode markup to capture module IDs, CSS classes, and admin labels that tend to remain unique when a layout is copied into a page.
+   - **Divi 5:** pulls distinctive block identifiers from the JSON (for example `_id` values and deeply nested module signatures) and looks for those fragments inside block content.
+   - A lightweight similarity check verifies that the target content still resembles the library item, ensuring we only flag true instantiated copies.
+   - Matches appear as “Instantiated Copy” usage, meaning the content is independent and safe to delete from the library.
 
 ### Content Scanning
 
