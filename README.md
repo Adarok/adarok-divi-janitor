@@ -151,183 +151,17 @@ This plugin implements comprehensive security measures:
 
 ## 🛠️ Developer Information
 
-### File Structure
+For architecture, conventions, and domain knowledge see [`AGENTS.md`](AGENTS.md).
 
-```
-adarok-divi-janitor/
-├── adarok-divi-janitor.php          # Main plugin file (~100 lines)
-├── uninstall.php                     # Cleanup script (~25 lines)
-├── LICENSE                           # GPL v2 license
-├── composer.json                     # PHP dependencies & scripts
-├── phpcs.xml                         # Coding standards config
-├── phpstan.neon                      # Static analysis config
-├── phpstan-bootstrap.php             # WordPress constants for PHPStan
-├── Makefile                          # Developer commands
-├── .github/
-│   └── workflows/
-│       └── code-quality.yml          # CI/CD automation
-├── includes/
-│   ├── class-library-scanner.php    # Core scanning logic (~400 lines)
-│   ├── class-admin-page.php         # Admin UI (~350 lines)
-│   └── class-ajax-handler.php       # AJAX handler (~200 lines)
-└── assets/
-    ├── css/admin.css                 # Styles (~450 lines)
-    └── js/admin.js                   # JavaScript (~280 lines)
-```
-
-### Code Quality & Development Tools
-
-This plugin uses professional-grade static analysis and coding standards tools:
-
-#### Quick Start
+### Quick Start
 
 ```bash
-# Install dependencies
-composer install
-
-# Run all checks (recommended before commits)
-make check
-
-# Individual checks
-make lint              # Check coding standards
-make lint-fix          # Auto-fix style issues
-make analyze           # Run static analysis
+composer install   # One-time setup
+make check         # Run PHPCS + PHPStan (must pass before commit)
+make lint-fix      # Auto-fix style issues
 ```
 
-#### Tool Stack
-
-**PHP_CodeSniffer (PHPCS)** - v3.13.4
-- Enforces WordPress Coding Standards
-- Security checks (nonce, escaping, sanitization)
-- PHP 8.1+ compatibility verification
-- Text domain and prefixing validation
-- Auto-fix available for most style issues
-
-**PHPStan** - v1.12.32 (Level 5)
-- Static type analysis
-- Detects potential bugs before runtime
-- WordPress-specific rules via szepeviktor/phpstan-wordpress
-- IDE integration available
-
-**WordPress Coding Standards (WPCS)** - v3.2.0
-- WordPress-Core, WordPress-Docs, WordPress-Extra
-- Best practices for WordPress plugin development
-- Security-focused rules
-
-**PHPCompatibility** - v2.1.7
-- Ensures PHP 8.1+ compatibility
-- Tests against multiple PHP versions (8.1, 8.2, 8.3, 8.4)
-
-#### Development Workflow
-
-1. **Before Starting Work**
-   ```bash
-   composer install  # One-time setup
-   ```
-
-2. **During Development**
-   - Write code following WordPress coding standards
-   - Use `make lint` periodically to check standards
-   - Fix issues with `make lint-fix` (auto-fixes style)
-   - Run `make analyze` to catch logical errors
-
-3. **Before Committing**
-   ```bash
-   make check  # Runs both lint and analyze
-   ```
-   - Fix any reported issues
-   - Commit only when all checks pass
-
-4. **Continuous Integration**
-   - GitHub Actions runs automatically on push/PR
-   - 3 parallel jobs: PHPCS, PHPStan, PHP Compatibility
-   - All checks must pass before merging
-
-#### Makefile Commands
-
-| Command | Description |
-|---------|-------------|
-| `make install` | Install Composer dependencies |
-| `make lint` | Check coding standards (PHPCS) |
-| `make lint-fix` | Auto-fix coding standards issues |
-| `make analyze` | Run static analysis (PHPStan) |
-| `make check` | Run all quality checks |
-
-#### Composer Scripts
-
-```bash
-composer run-script lint       # Same as make lint
-composer run-script lint:fix   # Same as make lint-fix
-composer run-script analyze    # Same as make analyze
-composer run-script check      # Same as make check
-```
-
-#### IDE Integration
-
-**VS Code:**
-1. Install extensions:
-   - "PHP Sniffer & Beautifier" by ValeryanM
-   - "PHPStan" by SanderRonde
-2. Configure paths in settings.json:
-   ```json
-   {
-     "phpSniffer.executablesFolder": "./vendor/bin/",
-     "phpSniffer.standard": "./phpcs.xml",
-     "phpstan.path": "./vendor/bin/phpstan"
-   }
-   ```
-
-**PHPStorm:**
-1. Settings → PHP → Quality Tools → PHP_CodeSniffer
-   - Configuration: `./vendor/bin/phpcs`
-   - Coding Standard: Custom → `./phpcs.xml`
-2. Settings → PHP → Quality Tools → PHPStan
-   - Configuration: `./vendor/bin/phpstan`
-   - Configuration file: `./phpstan.neon`
-
-#### GitHub Actions CI/CD
-
-The `.github/workflows/code-quality.yml` file runs automatically on:
-- Push to `main` or `develop` branches
-- Pull requests to `main` or `develop`
-
-**Jobs:**
-1. **PHPCS** (PHP 8.1) - Coding standards check
-2. **PHPStan** (PHP 8.2) - Static analysis
-3. **PHP Compatibility** (PHP 8.1, 8.2, 8.3, 8.4) - Multi-version testing
-
-All jobs run in parallel for fast feedback.
-
-#### Troubleshooting Development Tools
-
-**Composer Install Fails**
-```bash
-# Clear cache and retry
-composer clear-cache
-composer install
-```
-
-**PHPCS/PHPStan Not Found**
-```bash
-# Ensure vendor/bin is in PATH or use full path
-./vendor/bin/phpcs --version
-./vendor/bin/phpstan --version
-```
-
-**Too Many Errors**
-```bash
-# Start with auto-fix
-make lint-fix
-
-# Then manually fix remaining issues
-make lint
-```
-
-**PHPStan Memory Issues**
-```bash
-# Increase memory limit
-php -d memory_limit=512M vendor/bin/phpstan analyze
-```
+GitHub Actions CI runs PHPCS, PHPStan, and PHP Compatibility (8.1–8.4) on every push/PR.
 
 ### WordPress Hooks
 
@@ -343,21 +177,12 @@ php -d memory_limit=512M vendor/bin/phpstan analyze
 
 ### Custom Post Types Filter
 
-Add custom post types to the scanner:
-
 ```php
 add_filter( 'adarok_divi_janitor_post_types', function( $post_types ) {
     $post_types[] = 'my_custom_post_type';
     return $post_types;
 } );
 ```
-
-### Main Classes
-
-- `Adarok_Divi_Janitor` - Main plugin class (Singleton)
-- `Adarok_Divi_Janitor_Library_Scanner` - Core scanning logic (Static methods)
-- `Adarok_Divi_Janitor_Admin_Page` - Admin interface (Singleton)
-- `Adarok_Divi_Janitor_Ajax_Handler` - AJAX request handler (Singleton)
 
 ---
 
