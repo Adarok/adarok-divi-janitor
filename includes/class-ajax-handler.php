@@ -568,7 +568,7 @@ class Adarok_Divi_Janitor_Ajax_Handler {
 				}
 
 				foreach ( $prefixes as $prefix ) {
-					if ( 0 === strpos( $callable_name, $prefix ) ) {
+					if ( 0 === strpos( $callable_name, $prefix ) || 0 === strpos( $callable_name, 'ET\\' ) ) {
 						remove_filter( $hook, $callback['function'], $priority );
 						$removed_callbacks[] = array(
 							'function'      => $callback['function'],

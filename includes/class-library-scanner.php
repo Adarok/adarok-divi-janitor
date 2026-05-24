@@ -139,8 +139,8 @@ class Adarok_Divi_Janitor_Library_Scanner {
 	private static function is_global( $post_id ) {
 		global $wpdb;
 
-		// Try both possible taxonomy names (Divi uses different names in different contexts).
-		$taxonomy_names = array( 'et_pb_layout_scope', 'scope' );
+		// Divi 5 uses 'scope', Divi 4 used 'et_pb_layout_scope'.
+		$taxonomy_names = array( 'scope', 'et_pb_layout_scope' );
 
 		foreach ( $taxonomy_names as $taxonomy_name ) {
 			// Check if taxonomy is registered before trying to use it.
@@ -214,7 +214,7 @@ class Adarok_Divi_Janitor_Library_Scanner {
 		// 2. Global reference: "globalModule":"123" (Divi 5 block format).
 		// 3. Instantiated content: copied content that matches the library item.
 
-		// Global reference patterns.
+		// Global reference patterns (combined into single query per post type).
 		$global_patterns = array(
 			// Divi 4 patterns.
 			'global_module="' . $lib_id . '"',
@@ -225,36 +225,42 @@ class Adarok_Divi_Janitor_Library_Scanner {
 			'saved_tabs=\"' . $lib_id . '\"',
 			// Divi 5 patterns (block-based editor).
 			'"globalModule":"' . $lib_id . '"',
+			'"globalModule": "' . $lib_id . '"',
 			'\\"globalModule\\":\\"' . $lib_id . '\\"',
 		);
 
 		foreach ( $post_types as $post_type ) {
-			// First, search for global references.
+			// Search for all global reference patterns in a single query.
+			$like_clauses = array();
 			foreach ( $global_patterns as $pattern ) {
-				$query = $wpdb->prepare(
-					"SELECT ID, post_title, post_type, post_status, post_content
-                    FROM {$wpdb->posts}
-                    WHERE post_type = %s
-                    AND post_status IN ('publish', 'draft', 'pending', 'private')
-                    AND post_content LIKE %s",
-					$post_type,
+				$like_clauses[] = $wpdb->prepare(
+					'post_content LIKE %s',
 					'%' . $wpdb->esc_like( $pattern ) . '%'
 				);
+			}
 
-				$results = $wpdb->get_results( $query );  // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+			$query = $wpdb->prepare(
+				"SELECT ID, post_title, post_type, post_status, post_content
+				FROM {$wpdb->posts}
+				WHERE post_type = %s
+				AND post_status IN ('publish', 'draft', 'pending', 'private')
+				AND ( " . implode( ' OR ', $like_clauses ) . ' )',  // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+				$post_type
+			);
 
-				foreach ( $results as $result ) {
-					if ( ! isset( $usage[ $result->ID ] ) ) {
-						$usage[ $result->ID ] = array(
-							'id'          => $result->ID,
-							'title'       => $result->post_title,
-							'post_type'   => $result->post_type,
-							'post_status' => $result->post_status,
-							'edit_url'    => get_edit_post_link( $result->ID ),
-							'view_url'    => get_permalink( $result->ID ),
-							'usage_type'  => 'global',
-						);
-					}
+			$results = $wpdb->get_results( $query );  // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+
+			foreach ( $results as $result ) {
+				if ( ! isset( $usage[ $result->ID ] ) ) {
+					$usage[ $result->ID ] = array(
+						'id'          => $result->ID,
+						'title'       => $result->post_title,
+						'post_type'   => $result->post_type,
+						'post_status' => $result->post_status,
+						'edit_url'    => get_edit_post_link( $result->ID ),
+						'view_url'    => get_permalink( $result->ID ),
+						'usage_type'  => 'global',
+					);
 				}
 			}
 
@@ -339,6 +345,28 @@ class Adarok_Divi_Janitor_Library_Scanner {
 	private static function extract_content_signatures( $content, $lib_id ) {  // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		$signatures = array();
 
+		// Detect whether content is Divi 5 block format.
+		$is_block_format = ( strpos( $content, 'wp:divi/' ) !== false );
+
+		if ( $is_block_format ) {
+			$signatures = self::extract_block_signatures( $content );
+		} else {
+			$signatures = self::extract_shortcode_signatures( $content );
+		}
+
+		// Remove duplicates and return.
+		return array_unique( array_filter( $signatures ) );
+	}
+
+	/**
+	 * Extract signatures from Divi 4 shortcode content.
+	 *
+	 * @param string $content Shortcode content.
+	 * @return array Array of signature strings.
+	 */
+	private static function extract_shortcode_signatures( $content ) {
+		$signatures = array();
+
 		// Extract module_id values (these are unique identifiers for modules).
 		preg_match_all( '/module_id="([^"]+)"/', $content, $module_ids );
 		if ( ! empty( $module_ids[1] ) ) {
@@ -368,8 +396,47 @@ class Adarok_Divi_Janitor_Library_Scanner {
 			$signatures = array_merge( $signatures, array_slice( $ids[1], 0, 3 ) );
 		}
 
-		// Remove duplicates and return.
-		return array_unique( array_filter( $signatures ) );
+		return $signatures;
+	}
+
+	/**
+	 * Extract signatures from Divi 5 block (Gutenberg) content.
+	 *
+	 * @param string $content Block content.
+	 * @return array Array of signature strings.
+	 */
+	private static function extract_block_signatures( $content ) {
+		$signatures = array();
+
+		// Extract unique CSS IDs from block JSON attrs.
+		preg_match_all( '/"cssId":\{[^}]*"value":"([^"]+)"/', $content, $css_ids );
+		if ( ! empty( $css_ids[1] ) ) {
+			$signatures = array_merge( $signatures, array_slice( $css_ids[1], 0, 3 ) );
+		}
+
+		// Extract unique CSS classes from block JSON attrs.
+		preg_match_all( '/"cssClasses":\{[^}]*"value":"([^"]+)"/', $content, $css_classes );
+		if ( ! empty( $css_classes[1] ) ) {
+			foreach ( $css_classes[1] as $class ) {
+				if ( strlen( $class ) > 10 ) { // Only use meaningful classes.
+					$signatures[] = $class;
+				}
+			}
+		}
+
+		// Extract adminLabel values from block JSON.
+		preg_match_all( '/"adminLabel":"([^"]+)"/', $content, $admin_labels );
+		if ( ! empty( $admin_labels[1] ) ) {
+			$signatures = array_merge( $signatures, array_slice( $admin_labels[1], 0, 2 ) );
+		}
+
+		// Extract unique block _id values (internal Divi 5 identifiers).
+		preg_match_all( '/"_id":"([^"]+)"/', $content, $block_ids );
+		if ( ! empty( $block_ids[1] ) ) {
+			$signatures = array_merge( $signatures, array_slice( $block_ids[1], 0, 3 ) );
+		}
+
+		return $signatures;
 	}
 
 	/**
@@ -383,8 +450,11 @@ class Adarok_Divi_Janitor_Library_Scanner {
 	private static function is_instantiated_content( $library_content, $post_content, $lib_id ) {
 		// If it has a global reference to this ID, it's not instantiated.
 		$global_patterns = array(
+			// Divi 4 patterns.
 			'global_module="' . $lib_id . '"',
 			'template_id="' . $lib_id . '"',
+			// Divi 5 block pattern.
+			'"globalModule":"' . $lib_id . '"',
 		);
 
 		foreach ( $global_patterns as $pattern ) {
@@ -427,6 +497,10 @@ class Adarok_Divi_Janitor_Library_Scanner {
 		if ( ! empty( $et_builder_post_types ) && is_array( $et_builder_post_types ) ) {
 			$post_types = array_merge( $post_types, $et_builder_post_types );
 		}
+
+		// Include Divi 5 Theme Builder layout post types.
+		$theme_builder_types = array( 'et_header_layout', 'et_body_layout', 'et_footer_layout' );
+		$post_types          = array_merge( $post_types, $theme_builder_types );
 
 		// Allow filtering.
 		$post_types = apply_filters( 'adarok_divi_janitor_post_types', $post_types );
