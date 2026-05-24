@@ -7,7 +7,7 @@
 
 A WordPress plugin that helps you manage your Divi Library by showing where each library item is used throughout your site, with the ability to safely delete unused items.
 
-**Version**: 1.1.1 | **License**: GPL v2+ | **Author**: [Adarok](https://adarok.fi)
+**Version**: 1.2.0 | **License**: GPL v2+ | **Author**: [Adarok](https://adarok.fi)
 
 ---
 
@@ -236,6 +236,15 @@ This program is free software; you can redistribute it and/or modify it under th
 ---
 
 ## 📝 Changelog
+
+### Version 1.2.0 - May 2026
+- ✅ Full Divi 5 (released) compatibility: detect `wp:divi/global-layout` block references
+- ✅ Divi 5 block signature extraction for instantiated copy detection (`cssId`, `cssClasses`, `adminLabel`, `_id`)
+- ✅ Scan Theme Builder post types (`et_header_layout`, `et_body_layout`, `et_footer_layout`)
+- ✅ Catch Divi 5 namespaced callbacks (`ET\Builder\...`) during bulk delete hook removal
+- ✅ Prevent false "safe to delete" by checking Divi 5 global pattern in copy detection
+- ✅ Consolidate LIKE clauses into single query per post type to reduce DB load
+- ✅ Prioritise `scope` taxonomy over legacy `et_pb_layout_scope`
 
 ### Version 1.1.1 - October 2025
 - ✅ Hardened admin notices against XSS by ensuring messages render as plain text
